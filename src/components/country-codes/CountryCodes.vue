@@ -1,5 +1,6 @@
 <template>
   <div class="CountryCodes" tabindex="0" v-on:keyup="onKeypress($event)">
+    <div class="CountryCodes-Label">Country Code:</div>
     <div class="CountryCodes-Arrow"></div>
     <input class="CountryCodes-Input" 
            readonly 
@@ -26,20 +27,7 @@ import Vue from 'vue';
 import { Component } from 'vue-property-decorator';
 import { countriesList } from './countriesList';
 import { directive } from 'v-click-outside';
-
-
-interface SearchResult {
-  item: Country | undefined;
-  index: number;
-}
-
-interface Country {
-  name: string;
-  iso2: string;
-  dialCode: string;
-  priority: number;
-  areaCodes: string[] | null;
-}
+import { SearchResult, Country } from './models';
 
 @Component({
   directives: {
@@ -74,6 +62,7 @@ export default class CountryCodes extends Vue {
   public onCountrySelect(country: Country, index: number) {
     this.selectedIndex = index;
     this.selectedCode = `+${country.dialCode}`;
+    this.$emit('selected', country);
     this.closeDropdown();
   }
 
@@ -88,7 +77,7 @@ export default class CountryCodes extends Vue {
 
   public showDropdown() {
     this.dropDownIsShown = true;
-    setTimeout(() => {
+    this.$nextTick(() => {
       this._scrollToSelected();
     });
   }
