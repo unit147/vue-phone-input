@@ -20,7 +20,11 @@
     padding: 15px 16px 2px 10px;
     border: 1px solid #bebebe;
     border-radius: 0 3px 3px 0;
-    font-size: 14px;
+    font-size: 14px;    
+
+    &._valid {
+      color: #01bd07;
+    }
   }
 
   &-Example {
