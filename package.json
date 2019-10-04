@@ -5,8 +5,10 @@
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
+    "build-bundle": "vue-cli-service build --target lib --name pfPhoneInput ./src/App.vue",
     "lint": "vue-cli-service lint"
   },
+  "main": "./dists/pfPhoneInput.umd.min.js",
   "dependencies": {
     "core-js": "^2.6.5",
     "libphonenumber-js": "^1.7.25",
