@@ -1,5 +1,5 @@
 <template>
-  <div class="CountryCodes" tabindex="0" v-on:keyup="searchByKeypress($event)">
+  <div class="CountryCodes" tabindex="0" v-on:keyup="onKeypress($event)">
     <div class="CountryCodes-Arrow"></div>
     <input class="CountryCodes-Input" 
            readonly 
@@ -12,10 +12,10 @@
          v-if="dropDownIsShown"
          v-click-outside="closeDropdown">
       <div class="CountryCodes-Dropdown-Item" 
-           v-for="country in countries"
+           v-for="(country, index) in countries"
            :key="country.iso2"
            @click.prevent="onCountrySelect(country)"
-           v-bind:class="{'_highlighted': country.iso2 === highlightediso2 }"
+           v-bind:class="{'_highlighted': index === highlightedIndex, '_selected': index === selectedIndex }"
       >{{country.name}}</div>
     </div>
   </div>
@@ -50,10 +50,10 @@ export default class CountryCodes extends Vue {
   public countries: Country[] = [];
   public selectedCode: string = '';
   public dropDownIsShown: boolean = false;
-  public highlightediso2: string = '';
-  public selectediso2: string = '';
-  public handleOutsideClick: (e: any) => void;
+  private handleOutsideClick: (e: any) => void;
 
+  private selectedIndex: number = null;
+  private highlightedIndex: number = null;
   private itemHeight: number = 28;
   private dorpdownHeight: number = 300;
   private defaultCountryIso2: string = 'US';
@@ -76,31 +76,6 @@ export default class CountryCodes extends Vue {
     this.closeDropdown();
   }
 
-  public searchByKeypress(e: KeyboardEvent): any {
-    if (!this.dropDownIsShown) {
-      return false;
-    }
-    if (e.keyCode === 13) {
-      this._selectHighlighted();
-      return false;
-    }
-    if (!this.searchTimeout) {
-      this.searchStr = '';
-      this.searchTimeout = setTimeout(() => {
-        clearTimeout(this.searchTimeout);
-        this.searchTimeout = 0;
-      }, 2000);
-      this.searchStr += e.key;
-    } else {
-      this.searchStr += e.key;
-    }
-    const firstMatch  = this._findFirstMatch(this.searchStr, 'name');
-    if (firstMatch.item) {
-      this.highlightediso2 = firstMatch.item.iso2;
-      this._scrollToIndex(firstMatch.index);
-    }
-  }
-
   public toggleDropdown() {
     this.dropDownIsShown ? this.closeDropdown() : this.showDropdown();
   }
@@ -115,6 +90,42 @@ export default class CountryCodes extends Vue {
     setTimeout(() => {
       this._scrollToSelected();
     });
+  }
+
+  public onKeypress(e: KeyboardEvent): any {
+    if (!this.dropDownIsShown) {
+      return false;
+    }
+    // On Enter key
+    if (e.keyCode === 13) {
+      this._selectByIndex(this.highlightedIndex);
+      return false;
+    }
+    // On Up|Down Arrow keys
+    if (e.keyCode === 40 || e.keyCode === 38) {
+      //
+    }
+
+    console.log(e.keyCode);
+    this._searckByKeyPress(e.key);
+  }
+
+  private _searckByKeyPress(key: string) {
+    if (!this.searchTimeout) {
+      this.searchStr = '';
+      this.searchTimeout = setTimeout(() => {
+        clearTimeout(this.searchTimeout);
+        this.searchTimeout = 0;
+      }, 2000);
+      this.searchStr += key;
+    } else {
+      this.searchStr += key;
+    }
+    const firstMatch  = this._findFirstMatch(this.searchStr, 'name');
+    if (firstMatch.item) {
+      this.highlightedIndex = firstMatch.index;
+      this._scrollToIndex(firstMatch.index);
+    }
   }
 
   private _findFirstMatch(str: string, param: string, exact: boolean = false): SearchResult {
@@ -138,7 +149,7 @@ export default class CountryCodes extends Vue {
 
   private _resetVars() {
     this.searchStr = '';
-    this.highlightediso2 = '';
+    this.highlightedIndex = null;
   }
 
   private _scrollToIndex(index: number) {
@@ -149,21 +160,20 @@ export default class CountryCodes extends Vue {
   }
 
   private _scrollToSelected() {
-    if (this.selectediso2 !== '') {
-      const match  = this._findFirstMatch(this.selectediso2, 'iso2', true);
-      if (match.item) {
-        this.highlightediso2 = match.item.iso2;
-        this._scrollToIndex(match.index);
+    if (this.selectedIndex !== null) {
+      const country = this.countries[this.selectedIndex];
+      if (country) {
+        this._scrollToIndex(this.selectedIndex);
       }
     }
   }
 
-  private _selectHighlighted() {
-    if (this.highlightediso2 !== '') {
-      const highlightedCountry = this._findFirstMatch(this.highlightediso2, 'iso2', true);
-      this.selectediso2 = this.highlightediso2;
-      if (highlightedCountry.item) {
-        this.onCountrySelect(highlightedCountry.item);
+  private _selectByIndex(index: number) {
+    if (index !== null) {
+      const country = this.countries[index];
+      if (country) {
+        this.selectedIndex = index;
+        this.onCountrySelect(country);
       }
     }
   }
@@ -171,7 +181,7 @@ export default class CountryCodes extends Vue {
   private _selectDefaultCountry() {
     const match = this._findFirstMatch(this.defaultCountryIso2, 'iso2', true);
     if (match.item) {
-      this.selectediso2 = this.defaultCountryIso2;
+      this.selectedIndex = match.index;
       this.onCountrySelect(match.item);
     }
   }

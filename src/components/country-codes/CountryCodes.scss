@@ -68,6 +68,10 @@
       &._highlighted {
         background: #ececec;
       }
+      &._selected {
+        font-weight: bold;
+        background: #ececec;
+      }
 
       & + .CountryCodes-Dropdown-Item {
         border-top: 1px solid #e6e6e6;
