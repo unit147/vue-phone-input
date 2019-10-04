@@ -56,6 +56,7 @@ export default class CountryCodes extends Vue {
 
   private itemHeight: number = 28;
   private dorpdownHeight: number = 300;
+  private defaultCountryIso2: string = 'US';
   private searchStr: string = '';
   private searchTimeout: number;
 
@@ -67,6 +68,7 @@ export default class CountryCodes extends Vue {
       priority: country[3] || 0,
       areaCodes: country[4] || null,
     })).sort((a, b) => ( a.priority < b.priority) ? 1 : -1);
+    this._selectDefaultCountry();
   }
 
   public onCountrySelect(country: Country) {
@@ -92,7 +94,7 @@ export default class CountryCodes extends Vue {
     } else {
       this.searchStr += e.key;
     }
-    const firstMatch  = this._findFirtMatch(this.searchStr, 'name');
+    const firstMatch  = this._findFirstMatch(this.searchStr, 'name');
     if (firstMatch.item) {
       this.highlightediso2 = firstMatch.item.iso2;
       this._scrollToIndex(firstMatch.index);
@@ -110,9 +112,12 @@ export default class CountryCodes extends Vue {
 
   public showDropdown() {
     this.dropDownIsShown = true;
+    setTimeout(() => {
+      this._scrollToSelected();
+    });
   }
 
-  private _findFirtMatch(str: string, param: string, exact: boolean = false): SearchResult {
+  private _findFirstMatch(str: string, param: string, exact: boolean = false): SearchResult {
     let countryIndex: number = 0;
     let countryMatch;
     this.countries.some((country: any, index: number) => {
@@ -138,16 +143,36 @@ export default class CountryCodes extends Vue {
 
   private _scrollToIndex(index: number) {
     const ref = this.$refs.dropdownRef as Element;
-    ref.scrollTop = (index * this.itemHeight) - (this.dorpdownHeight / 2) + (this.itemHeight / 2);
+    if (ref) {
+      ref.scrollTop = (index * this.itemHeight) - (this.dorpdownHeight / 2) + (this.itemHeight / 2);
+    }
+  }
+
+  private _scrollToSelected() {
+    if (this.selectediso2 !== '') {
+      const match  = this._findFirstMatch(this.selectediso2, 'iso2', true);
+      if (match.item) {
+        this.highlightediso2 = match.item.iso2;
+        this._scrollToIndex(match.index);
+      }
+    }
   }
 
   private _selectHighlighted() {
     if (this.highlightediso2 !== '') {
-      const highlightedCountry = this._findFirtMatch(this.highlightediso2, 'iso2', true);
+      const highlightedCountry = this._findFirstMatch(this.highlightediso2, 'iso2', true);
       this.selectediso2 = this.highlightediso2;
       if (highlightedCountry.item) {
         this.onCountrySelect(highlightedCountry.item);
       }
+    }
+  }
+
+  private _selectDefaultCountry() {
+    const match = this._findFirstMatch(this.defaultCountryIso2, 'iso2', true);
+    if (match.item) {
+      this.selectediso2 = this.defaultCountryIso2;
+      this.onCountrySelect(match.item);
     }
   }
 
