@@ -1,0 +1,21 @@
+.PhoneInput {
+  box-sizing: border-box;  
+  font-size: 14px;
+  font-family: Arial, "Helvetica Neue", Helvetica, sans-serif;
+  display: flex;
+  flex-flow: row nowrap;
+
+  /deep/ *:before,
+  /deep/ *:after,
+  /deep/ * {
+    box-sizing: border-box;
+  }
+
+  &-Input {
+    height: 35px;
+    padding: 10px 16px 10px 10px;
+    border: 1px solid #bebebe;
+    border-radius: 0 3px 3px 0;
+    font-size: 14px;
+  }
+}

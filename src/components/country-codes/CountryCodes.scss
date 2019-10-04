@@ -2,15 +2,6 @@
   position: relative;
   width: 100px;
   height: 35px;
-  box-sizing: border-box;  
-  font-size: 14px;
-  font-family: Arial, "Helvetica Neue", Helvetica, sans-serif;
-
-  *:before,
-  *:after,
-  * {
-    box-sizing: border-box;
-  }
 
   &-Arrow {
     position: absolute;
@@ -28,7 +19,8 @@
     padding: 10px 16px 10px 10px;
     border: 1px solid #bebebe;
     cursor: pointer;
-    border-radius: 3px;
+    border-radius: 3px 0 0 3px;
+    border-right: none;
   }
 
   &-Dropdown {
